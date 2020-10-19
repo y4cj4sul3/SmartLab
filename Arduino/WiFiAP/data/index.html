@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
-	<head> </head>
+	<head>
+		<link rel="shortcut icon" href="favicon.ico" />
+		<link rel="bookmark" href="favicon.ico" />
+	</head>
 	<body>
 		<div style="text-align: center"><h1>SmartLab</h1></div>
 
@@ -29,6 +32,10 @@
 		</div>
 
 		<!-- Other stuff  -->
+		<h3>Light Switch</h3>
+		<button id="lightSwitchBtn" onclick="toggleLightSwitch()">
+			Turn On
+		</button>
 
 		<script>
 			var nkDiv = document.getElementById("nkDiv");
@@ -114,10 +121,10 @@
 			var xmlHTTPnk = new XMLHttpRequest();
 			xmlHTTPnk.onreadystatechange = function () {
 				if (xmlHTTPnk.readyState == 4 && xmlHTTPnk.status == 200) {
-					var reponse = xmlHTTPnk.responseText;
-					console.log(reponse);
+					var response = xmlHTTPnk.responseText;
+					console.log(response);
 
-					if (reponse.charAt(0) == "C") {
+					if (response.charAt(0) == "C") {
 						// hide div
 						nkDiv.style.display = "none";
 						// show reset button
@@ -203,6 +210,43 @@
 				xmlHTTPcn.open("POST", "/network", true);
 				xmlHTTPcn.send(request);
 			};
+
+			// Light Switch
+			var lightSwitchBtn = document.getElementById("lightSwitchBtn");
+			var lightState = true;
+
+			// Servo
+			var xmlHTTPmotor = new XMLHttpRequest();
+			xmlHTTPmotor.onreadystatechange = function () {
+				if (
+					xmlHTTPmotor.readyState == 4 &&
+					xmlHTTPmotor.status == 200
+				) {
+					var response = xmlHTTPmotor.responseText;
+					console.log(response);
+				}
+			};
+			function toggleLightSwitch() {
+				if (lightState) {
+					// light on
+					servoSetAngle(180);
+					lightSwitchBtn.innerHTML = "Turn Off";
+				} else {
+					// light off
+					servoSetAngle(0);
+					lightSwitchBtn.innerHTML = "Turn On";
+				}
+				lightState = !lightState;
+			}
+			function servoSetAngle(angle) {
+				var queryCmd = "/servo?angle=" + angle;
+				console.log(queryCmd);
+				xmlHTTPmotor.open("GET", queryCmd, true);
+				xmlHTTPmotor.send(null);
+			}
+
+			// set to off first
+			toggleLightSwitch();
 		</script>
 	</body>
 </html>

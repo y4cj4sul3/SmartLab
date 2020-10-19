@@ -2,11 +2,14 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <FS.h>
+#include <Servo.h>
 
 const char *APssid = "SmartLab";
 const char *APpassword = "00000000";
 
 ESP8266WebServer server(80);
+
+Servo myservo;
 
 void handleCheckNetwork()
 {
@@ -104,6 +107,17 @@ void handleScanNetwork()
   Serial.println(message);
 }
 
+void handleServo(){
+  String message = server.arg("angle");
+  int angle = message.toInt();
+
+  myservo.write(angle);
+  
+  // send message
+  server.send(200, "text/plain", message);
+  Serial.println(message);
+}
+
 // SPIFFS
 String getContentType(String filename);
 bool handleFileRead(String path);
@@ -116,6 +130,7 @@ void setup()
   Serial.println("");
 
   // Pin mode
+  myservo.attach(12); // D6
 
   // WiFi
   // set to AP+STA
@@ -133,6 +148,7 @@ void setup()
   server.on("/network", HTTP_GET, handleCheckNetwork);
   server.on("/network", HTTP_POST, handleConnectNetwork);
   server.on("/scan_network", HTTP_GET, handleScanNetwork);
+  server.on("/servo", HTTP_GET, handleServo);
   server.onNotFound([]() {
     // find file and send to client
     if (!handleFileRead(server.uri()))
