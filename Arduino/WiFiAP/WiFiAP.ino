@@ -107,15 +107,39 @@ void handleScanNetwork()
   Serial.println(message);
 }
 
-void handleServo(){
+void handleServo()
+{
   String message = server.arg("angle");
   int angle = message.toInt();
 
-  myservo.write(angle);
-  
   // send message
   server.send(200, "text/plain", message);
   Serial.println(message);
+
+  myservo.write(angle);
+}
+
+void handleSwitch()
+{
+  String message = server.arg("dir");
+
+  // send message
+  server.send(200, "text/plain");
+  Serial.println("switch");
+
+  // TODO
+  if (message == "up")
+  {
+    myservo.write(41);
+    delay(1500);
+    myservo.write(90);
+  }
+  else if (message == "down")
+  {
+    myservo.write(139);
+    delay(1500);
+    myservo.write(90);
+  }
 }
 
 // SPIFFS
@@ -149,6 +173,7 @@ void setup()
   server.on("/network", HTTP_POST, handleConnectNetwork);
   server.on("/scan_network", HTTP_GET, handleScanNetwork);
   server.on("/servo", HTTP_GET, handleServo);
+  server.on("/switch", HTTP_GET, handleSwitch);
   server.onNotFound([]() {
     // find file and send to client
     if (!handleFileRead(server.uri()))

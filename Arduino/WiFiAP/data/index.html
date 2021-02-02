@@ -32,9 +32,12 @@
 		</div>
 
 		<!-- Other stuff  -->
-		<h3>Light Switch</h3>
-		<button id="lightSwitchBtn" onclick="toggleLightSwitch()">
-			Turn On
+		<button id="lightSwitchBtn1" onclick="toggleLightSwitch('up')">
+			Light Switch 1
+		</button>
+
+		<button id="lightSwitchBtn2" onclick="toggleLightSwitch('down')">
+			Light Switch 2
 		</button>
 
 		<script>
@@ -226,27 +229,16 @@
 					console.log(response);
 				}
 			};
-			function toggleLightSwitch() {
-				if (lightState) {
-					// light on
-					servoSetAngle(180);
-					lightSwitchBtn.innerHTML = "Turn Off";
-				} else {
-					// light off
-					servoSetAngle(0);
-					lightSwitchBtn.innerHTML = "Turn On";
-				}
-				lightState = !lightState;
-			}
-			function servoSetAngle(angle) {
-				var queryCmd = "/servo?angle=" + angle;
+			function toggleLightSwitch(lightId) {
+				
+				var queryCmd = "/switch?dir=" + lightId;
 				console.log(queryCmd);
 				xmlHTTPmotor.open("GET", queryCmd, true);
 				xmlHTTPmotor.send(null);
 			}
 
 			// set to off first
-			toggleLightSwitch();
+			//toggleLightSwitch();
 		</script>
 	</body>
 </html>
