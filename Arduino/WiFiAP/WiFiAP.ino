@@ -3,12 +3,13 @@
 #include <ESP8266WebServer.h>
 #include <FS.h>
 #include <Servo.h>
+#include <ESP8266mDNS.h>        // Include the mDNS library
 
 const char *APssid = "SmartLab";
 const char *APpassword = "00000000";
 
 ESP8266WebServer server(80);
-
+IPAddress myIP;
 Servo myservo;
 
 void handleCheckNetwork()
@@ -23,7 +24,8 @@ void handleCheckNetwork()
   case WL_CONNECTED:
     // connected to network
     message += "C: ";
-    message += WiFi.SSID();
+    message += myIP.toString();
+    //message += WiFi.SSID();
     break;
 
   case WL_CONNECT_FAILED:
@@ -161,9 +163,18 @@ void setup()
   WiFi.mode(WIFI_AP_STA);
   // host soft AP
   WiFi.softAP(APssid, APpassword);
-  IPAddress myIP = WiFi.softAPIP(); // GET IP address
+  
   Serial.print("HotSpt IP: ");
-  Serial.println(myIP);
+  Serial.println(WiFi.softAPIP());
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    if (!MDNS.begin("light")) {             // Start the mDNS responder for esp8266.local
+  
+    Serial.println("Error setting up MDNS responder!");
+  }
+  Serial.println("mDNS responder started");
+  }
+  MDNS.addService("http", "tcp", 80);
 
   // SPIFFS
   SPIFFS.begin();
@@ -192,6 +203,7 @@ void setup()
 
 void loop()
 {
+  MDNS.update();
   // Handle client requests
   server.handleClient();
 
@@ -207,9 +219,9 @@ void connectToNetwork(String nk_ssid, String nk_pass)
   // AP settings
   // check that AP still alive
   // FIXME: might not need to do this
-  IPAddress myIP = WiFi.softAPIP(); // Get IP address
+  
   Serial.print("HotSpt IP: ");
-  Serial.println(myIP);
+  Serial.println(WiFi.softAPIP());
 
   // STA settings
   WiFi.begin(nk_ssid, nk_pass);
@@ -233,6 +245,16 @@ void connectToNetwork(String nk_ssid, String nk_pass)
 
   Serial.print("Connected, IP address: ");
   Serial.println(WiFi.localIP());
+  myIP=WiFi.localIP();
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    if (!MDNS.begin("light")) {             // Start the mDNS responder for esp8266.local
+  
+    Serial.println("Error setting up MDNS responder!");
+  }
+  Serial.println("mDNS responder started");
+  }
+  MDNS.addService("http", "tcp", 80);
 }
 
 String getContentType(String filename)

@@ -26,6 +26,7 @@
 			<button id="nkConnectBtn" disabled="true">Connect</button><br />
 		</div>
 		<div id="nkResetDiv" style="display: none">
+			<span id="ipip" style="color: rgb(128, 128, 128)"></span><br />
 			<button onclick="connectToOtherNetwork()">
 				Connect to other network
 			</button>
@@ -48,6 +49,7 @@
 			var nkScanbtn = document.getElementById("nkScanbtn");
 			var nkConnectBtn = document.getElementById("nkConnectBtn");
 			var nkResetDiv = document.getElementById("nkResetDiv");
+			var ipip = document.getElementById("ipip");
 
 			function showNetworkStatus(text, color) {
 				nkStatus.innerHTML = text;
