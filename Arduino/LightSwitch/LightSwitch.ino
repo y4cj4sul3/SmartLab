@@ -19,6 +19,64 @@ ESP8266WebServer server(80);
 Servo switchServo;   // limited servo: 0~180
 Servo positionServo; // continuous servo
 
+// switch pos (idle, btn1, btn2, ...)
+int switchPos[] = {0, 90, 180, 270};
+// switch pos (idle, ON, OFF)
+int switchAgl[] = {90, 0, 180};
+
+void controlSwitch(int id, bool state)
+{
+    // move to switch
+    controlPositionServo(switchPos[id + 1] - switchPos[0]);
+    delay(500);
+
+    if (state)
+    {
+        // turn ON
+        switchServo.write(switchAgl[1]);
+    }
+    else
+    {
+        // turn OFF
+        switchServo.write(switchAgl[2]);
+    }
+    delay(1500);
+    switchServo.write(switchAgl[0]);
+    delay(500);
+
+    // move back to idle position
+    controlPositionServo(switchPos[0] - switchPos[id + 1]);
+}
+
+void controlPositionServo(int move)
+{
+    // TODO: convert movement to angle
+    int angle = move;
+    Serial.println(angle);
+
+    if (angle > 0)
+    {
+        // rotate CW
+        positionServo.write(0);
+    }
+    else
+    {
+        // rotate CCW
+        positionServo.write(180);
+        angle = -angle;
+    }
+
+    // TODO: measure
+    // convert angle to delay, which is not very accurate
+    // angle 90 ~> 150 ms
+    int delayTime = max(angle * 2, 0);
+    Serial.println(delayTime);
+    delay(delayTime);
+
+    // stop
+    positionServo.write(90);
+}
+
 void handleServo()
 {
     String message = server.arg("angle");
@@ -33,52 +91,35 @@ void handleServo()
 
 void handleSwitch()
 {
-    String message = server.arg("dir");
+    int id = server.arg("id").toInt();
+    int state = server.arg("state") == "true";
 
     // send message
     server.send(200, "text/plain");
-    Serial.println("switch");
+    Serial.print("Turn switch ");
+    Serial.print(id);
+    if (state)
+    {
+        Serial.println(" ON");
+    }
+    else
+    {
+        Serial.println(" OFF");
+    }
 
-    if (message == "on")
-    {
-        switchServo.write(41);
-        delay(1500);
-        switchServo.write(90);
-    }
-    else if (message == "off")
-    {
-        switchServo.write(139);
-        delay(1500);
-        switchServo.write(90);
-    }
+    controlSwitch(id, state);
 }
 
 void handlePosition()
 {
     String message = server.arg("pos");
-    int angle = message.toInt();
+    int pos = message.toInt();
 
     // send message
     server.send(200, "text/plain");
     Serial.println("set pos");
 
-    // rotate clockwise
-    if (angle > 0)
-    {
-        positionServo.write(0);
-    }
-    else
-    {
-        positionServo.write(180);
-        angle = -angle;
-    }
-
-    // convert angle to delay, which is not very accurate
-    angle = max(angle - 30, 0);
-    delay(angle);
-
-    // stop
-    positionServo.write(90);
+    controlPositionServo(pos);
 }
 
 void setup()

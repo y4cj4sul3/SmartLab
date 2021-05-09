@@ -33,13 +33,15 @@
 		</div>
 
 		<!-- Light Switch -->
-		<button id="lightSwitchBtn1" onclick="toggleLightSwitch('up')">
-			Light Switch 1
-		</button>
+		<div id="lightSwitches"></div>
 
-		<button id="lightSwitchBtn2" onclick="toggleLightSwitch('down')">
-			Light Switch 2
-		</button>
+		<template id="lightSwitchTemplate">
+			<div class="lightSwitch">
+				<label class="btnLabel">Light Switch</label>
+				<button class="lightSwitchBtn">ON</button>
+			</div>
+			<br>
+		</template>
 
 
         <script type="text/javascript", src="wifi_connection.js"></script>
